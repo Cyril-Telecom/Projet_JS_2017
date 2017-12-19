@@ -3,41 +3,54 @@ var context = canvas.getContext("2d");
 
 //Affichage du sol
 var drawGrass = function(){
-	for (var i = 0; i < 10; i++) {
-		for (var j = 0; j < 10; j++) {
-			context.drawImage(grass, i*64, j*64);
+	for (var i = 0; i < 12; i++) {
+		for (var j = 0; j < 16; j++) {
+			context.drawImage(grass, i*50, j*50);
 		}
 	}
 };
+
+// variable
 var grass = new Image();
+var pointeur= new Image();
+// chargement image 
+if (grass.src = "grass.png") {
+	grass.onload = drawGrass;
+	pointeur.src = "viseur.png";
+}
+
+
+canvas.onmouseover=function(){
+	alert("nnnnnnnnnnnnnnnnn!");
+}
+//onmouseover
 
 
 
-//Affichage du pikachu
-var direction = {
-	"ArrowRight": 128,
-	"ArrowLeft": 64,
-	"ArrowUp": 192,
-	"ArrowDown": 0,
-};
 
-var marche = {
-	"3": 128,
-	"2": 64,
-	"4": 192,
-	"1": 0
-};
- 
-var sx = marche["1"];
-var sy = direction["ArrowDown"];
-var x = 0;
-var y = 0;
-var col = 1;
-var col2 = 0;
-var sensX = 0;
-var sensY = 0;
-var enAction = false;
-var tonerre = false;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 var audio = document.createElement("Audio");
 var drawPikachu = function(){
 	console.log(pikachu, sx, sy, 64, 64, x, y, 64, 64);
@@ -51,67 +64,4 @@ var soundEclair = function(){
 }
 audio.src = "kachu.wav";
 var pikachu = new Image();
-
-if (grass.src = "grass.png") {
-	if(pikachu.src = "pikachu.png"){
-		grass.onload = drawGrass;
-		pikachu.onload = drawPikachu;	
-	}
-}
-//déplacement
-
-document.onkeydown = function(e){
-	enAction = true;
-	//sy = direction[e.key];
-	if (e.key==="ArrowRight") {
-		//x = x + 10;
-		sensX = 10; 
-		sy = direction[e.key];
-	}else if (e.key==="ArrowLeft") {
-		//x=x-10;
-		sensX = -10; 
-		sy = direction[e.key];
-	}else if (e.key==="ArrowUp") {
-		sensY = -10; 
-		sy = direction[e.key];
-		//y=y-10;
-	}else if (e.key==="ArrowDown") {
-		sensY = 10; 
-		sy = direction[e.key];
-		//=y+10;
-	}else if (e.key === " ") {
-		tonerre = true;
-/*		context.clearRect(0, 0, 500, 500);
-		drawGrass();
-		drawPikachu(); 
-		drawEclair(); */
-	}		
-	/*context.clearRect(0, 0, 500, 500);
-	drawGrass();
-	drawPikachu();*/
-};
-
-document.onkeyup = function(e){
-	enAction = false;
-	sensX = 0;
-	sensY = 0;
-	tonerre = false;
-};
-
-setInterval(
-	function(){
-		if (enAction === true){
-			x = x + sensX;
-			y = y + sensY;
-			sx = marche[col];
-			col = (col + 1) % 4 +1 ;
-			context.clearRect(0, 0, 500, 500);
-			drawGrass();
-			drawPikachu();
-			if(tonerre === true){
-				col2 = (col2 + 1) % 4 ;
-				drawEclair();
-				audio.play();
-			}	
-		}
-	},400);
+*/
