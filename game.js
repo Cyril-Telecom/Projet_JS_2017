@@ -10,7 +10,9 @@ var zombieType = {sx : 0, sy : 0, swidth : 32, sheight : 32, positionX : 0, posi
 var tabZombies = [];
 var graveType = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
 var tabGraves = [];
+var pause;
 //requestannimationframe
+
 // variable
 var grass = new Image();
 var graveImage = new Image();
@@ -89,11 +91,30 @@ var moveZombies = function(){
 	}
 };
 
+// la pause sur le bouton "p"
+document.onkeydown = function (e) {
+	if(e.key=="p"){
+		if(pause==true){
+			pause=false;
+			requestAnimationFrame(step);
+		}else{
+			pause=true;
+			context.fillStyle = "rgba(250, 250, 250, 0.5)";
+			context.fillRect(0, 0, 600, 800);
+			context.fillStyle ="black";
+			context.font = "82px Impact";
+			context.fillText("PAUSE",200,400);
+		}
+		
+	}
+}
+
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 var start = null;
 
 function step(timestamp) {
+	if(pause==true){return;}
 	var progress;
 	if (start === null) start = timestamp;
 	progress = timestamp - start;
