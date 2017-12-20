@@ -73,6 +73,10 @@ class Zombie {
 		this.sensDisplayImage = 1;
 
 		//Définittion des PV, de la taille et de l'allure
+		//this.categoriser(n, m, c, d);
+	}
+	categoriser(n, m, c, d){
+		//Définittion des PV, de la taille et de l'allure EN FONCTION de la catégorie
 		if (d === 0){
 			this.HP = 1;
 			this.point = 1;
