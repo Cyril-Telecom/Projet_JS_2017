@@ -31,6 +31,18 @@ canvas.onmouseover = function(){
 	this.style.cursor = "url('curseur.cur'), auto";
 };
 
+canvas.onmouseup = function(e){
+	var x = e.clientX - 330;
+	var y = e.clientY - 50;
+	console.log(x);
+	console.log(y);
+	for (var i = 0; i < tabZombies.length; i++) {
+		//console.log(tabZombies[i].isHere(x, y));
+		if (tabZombies[i].isHere(x, y)){
+			tabZombies[i].loseHP();
+		}
+	}
+};
 //Affichage du sol
 var drawGrass = function(){
 	for (var i = 0; i < 12; i++) {
@@ -41,22 +53,30 @@ var drawGrass = function(){
 };
 
 //Affichage des tombes
-var drawGraves = function(){
+var drawGraves = function(timestamp){
+	//console.log("nb de tombe = "+tabGraves.length);
 	for (var i = tabGraves.length - 1; i >= 0; i--) {
 		tabGraves[i].draw();
+		if (timestamp - tabGraves[i].getTime() > 10000) {
+			tabGraves.splice(i, 1);
+		}
 	}
 };
 
 var drawZombies = function(){
-	//console.log(tabZombies.length);
-	for (var i = tabZombies.length - 1; i >= 0; i--) {
+	//console.log("nb de zombie = " +tabZombies.length);
+	for (var i = 0; i < tabZombies.length; i++) {
 		//console.log(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
 		tabZombies[i].draw();
+		if (tabZombies[i].getHP() <= 0) {
+			tabZombies.splice(i, 1);
+		}
 	}
 };
 
 class Zombie {
 	constructor(n, m, c, d){
+		//paramètres de l'image
 		this.sx = d * 96;//abscisse du zombie dans l'image d'origine
 		this.sy = c * 128;//ordonée du zombie dans l'image d'origine
 		this.swidth = 32;//largeur du zombie sur l'image d'origine
@@ -78,13 +98,11 @@ class Zombie {
 			this.maxHP = 1;
 			this.point = 1;
 			this.speed = 1;//rapide
-			this.width = 1*this.width;
 		} else if (d === 1){
 			this.HP = 2;
 			this.maxHP = 2;
 			this.point = 3;
 			this.speed = 0.6;//lent
-			this.width = 1*this.width;
 			if (c === 1){
 				this.HP = 25;
 				this.maxHP = 25;
@@ -98,16 +116,11 @@ class Zombie {
 			this.maxHP = 3;
 			this.point = 5;
 			this.speed = 0.8;//modéré
-			this.width = 1*this.width;
 		}
 	}
-
+	//ajoute un zombie à tabZombies
 	add(){
 		tabZombies.push(this);
-	}
-
-	delete(){
-		
 	}
 	//Affichage des zombies et de leur barre de vie
 	//chaque zombie fait 32x32
@@ -118,11 +131,19 @@ class Zombie {
 		//choix de la couleur
 		if (this.HP === this.maxHP) {
 			context.fillStyle = "#00FF00";//vert
-		}else if (this.HP > this.maxHP/2) {
+		}else if (this.HP >= (this.maxHP)/2) {
 			context.fillStyle = "#FF9900";//orange
-		}else if (this.HP < this.maxHP/2) {
+		}else{
 			context.fillStyle = "#FF0000";//rouge
 		}
+		/*if (this.maxHP >= 2) {
+			for (var i = 1; i < this.maxHP; i++) {
+				context.moveTo(i * this.width / this.maxHP, this.positionY - 5);
+				context.lineTo(i * this.width / this.maxHP, this.positionY - 4);
+				context.fill();
+				//context.fillStyle = "#000000";
+			}			
+		}*/
 	}
 	move(){
 		//Changement d'image du pas
@@ -133,10 +154,22 @@ class Zombie {
 		//déplacmeent de l'image
 		this.positionY = this.positionY + 10 * this.speed;
 	}
+	isHere(x, y){
+		if ((this.positionX < x) && (x < this.positionX + this.width) && (this.positionY < y) && (y < this.positionY + this.height)) {
+			return true;
+		}
+	}
+	loseHP(){
+		this.HP--;
+	}
+	getHP(){
+		return this.HP;
+	}
 }
 
 class Grave {
-	constructor(n, m, e, f){
+	constructor(n, m, e, f, timestamp){
+		//paramètres de l'image
 		this.sx = e * 80;
 		this.sy = f * 121;
 		this.swidth = 80;
@@ -145,12 +178,14 @@ class Grave {
 		this.positionY = m;
 		this.width = 32;
 		this.height = 48;
+
+		this.time = timestamp;
 	}
 	add(){
 		tabGraves.push(this);
 	}
-	delete(){
-
+	getTime(){
+		return this.time;
 	}
 	draw(){
 		context.drawImage(graveImage, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
@@ -166,11 +201,11 @@ function getRandomInt(min, max) {
 }
 
 //Ajout d'une tombe aléatoire et d'un zombie aléatoire
-var emergenceZombieAndGrave = function(){
+var emergenceZombieAndGrave = function(timestamp){
 	var positionX = Math.random() * (600-64);
 	var positionY = Math.random() * 100;
 
-	//Généaration du zombie
+	//Génération du zombie
 	do{
 		var d = getRandomInt(0,3);
 	} while (d === 2)
@@ -178,16 +213,17 @@ var emergenceZombieAndGrave = function(){
 		var c = getRandomInt(0,1);
 	} while (c === 1 && (d === 0 || d === 3))
 	var a = new Zombie (positionX, positionY, c, d);
+	a.add();
+
 	//Génération de la tombe
 	var e = getRandomInt(0,1);
 	var f = getRandomInt(0,1);
-	var b = new Grave (positionX, positionY, e, f);
-	a.add();
+	var b = new Grave (positionX, positionY, e, f, timestamp);
 	b.add();
 };
 
 var moveZombies = function(){
-	for (var i = tabZombies.length - 1; i >= 0; i--) {
+	for (var i = 0; i < tabZombies.length; i++) {
 /*		context.drawImage(zombieImage,0,0,64,64, 0,0, 100, 100);
 		console.log(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, 
 		tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
@@ -199,9 +235,9 @@ var moveZombies = function(){
 
 // la pause sur le bouton "p"
 document.onkeydown = function (e) {
-	if(e.key=="p"){
-		if(pause==true){
-			pause=false;
+	if(e.key === "p"){
+		if(pause === true){
+			pause = false;
 			requestAnimationFrame(step);
 		}else{
 			pause=true;
@@ -211,53 +247,40 @@ document.onkeydown = function (e) {
 			context.font = "82px Impact";
 			context.fillText("PAUSE",200,400);
 		}
-		
 	}
 }
+
+/*document.oncontextmenu = function(e){
+	var x = e.clientX;
+	var y = e.clientY;
+	console.log(x);
+	console.log(y);
+	for (var i = 0; i < tabZombies.length; i++) {
+		if (tabZombies[i].isHere(x, y)){
+			tabZombies[i].loseHP();
+		}
+	}
+}*/
 
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 var start = null;
 
 function step(timestamp) {
-	if(pause==true){return;}
+	if(pause === true) return;
 	var progress;
 	if (start === null) start = timestamp;
 	progress = timestamp - start;
-	if (progress > 500){
+	if (progress > 1000){
 		start = timestamp;
 		context.clearRect(0, 0, 600, 800);
 		drawGrass();
-		drawGraves();
+		drawGraves(timestamp);
 		drawZombies();
 		moveZombies();
-		emergenceZombieAndGrave();
+		emergenceZombieAndGrave(timestamp);
 	}
 	requestAnimationFrame(step);
 };
 
 requestAnimationFrame(step);
-
-
-
-
-
-
-
-
-
-/*
-var audio = document.createElement("Audio");
-var drawPikachu = function(){
-	console.log(pikachu, sx, sy, 64, 64, x, y, 64, 64);
-	context.drawImage(pikachu, sx, sy, 64, 64, x, y, 64, 64);
-};
-var drawEclair = function(){
-	context.drawImage(pikachu, col2 * 64, 256, 64, 64, x, y, 64, 64);
-};
-var soundEclair = function(){
-	audio.playSound();
-}
-audio.src = "kachu.wav";
-var pikachu = new Image();
-*/
