@@ -12,18 +12,17 @@ var drawGrass = function(){
 
 // variable
 var grass = new Image();
-var pointeur= new Image();
+
 // chargement image 
 if (grass.src = "grass.png") {
 	grass.onload = drawGrass;
-	pointeur.src = "viseur.png";
 }
 
-
+// viseur 
 canvas.onmouseover=function(){
-	alert("nnnnnnnnnnnnnnnnn!");
+	this.style.cursor="url('curseur.cur'),auto ";
 }
-//onmouseover
+
 
 
 
