@@ -1,19 +1,16 @@
 var canvas = document.getElementById("cv");
 var context = canvas.getContext("2d");
 
-
+//déclaration des variables
 var x = 0;
 var y = 0;
 var sx = 0;
 var sy = 0;
-var zombieType = {sx : 0, sy : 0, swidth : 32, sheight : 32, positionX : 0, positionY : 0, width : 32, height : 32};
+//var zombieType = {sx : 0, sy : 0, swidth : 32, sheight : 32, positionX : 0, positionY : 0, width : 32, height : 32};
 var tabZombies = [];
-var graveType = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
+//var graveType = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
 var tabGraves = [];
 var pause;
-//requestannimationframe
-
-// variable
 var grass = new Image();
 var graveImage = new Image();
 var zombieImage = new Image();
@@ -21,16 +18,18 @@ var pointeur = new Image();
 
 // chargement des images 
 graveImage.src = "Gravestone.png";
-graveImage.onload = drawGrave;
+graveImage.onload = drawGraves;
 
 zombieImage.src = "ZombieSprite.png";
 zombieImage.onload = drawZombies;
 
 grass.src = "grass.png";
 grass.onload = drawGrass;
-//pointeur.src = "viseur.png";
-//pointeur.onload = 
 
+// viseur 
+canvas.onmouseover = function(){
+	this.style.cursor = "url('curseur.cur'), auto";
+};
 
 //Affichage du sol
 var drawGrass = function(){
@@ -42,52 +41,147 @@ var drawGrass = function(){
 };
 
 //Affichage des tombes
-var drawGrave = function(){
+var drawGraves = function(){
 	for (var i = tabGraves.length - 1; i >= 0; i--) {
-		context.drawImage(graveImage, tabGraves[i].sx, tabGraves[i].sy, tabGraves[i].swidth, tabGraves[i].sheight, tabGraves[i].positionX, tabGraves[i].positionY, tabGraves[i].width, tabGraves[i].height);
+		tabGraves[i].draw();
 	}
 };
-//Affichage des zombies
-//chaque zombie fait 32x32
+
 var drawZombies = function(){
-	console.log(tabZombies.length);
+	//console.log(tabZombies.length);
 	for (var i = tabZombies.length - 1; i >= 0; i--) {
 		//console.log(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
-		context.drawImage(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
+		tabZombies[i].draw();
 	}
 };
 
-// viseur 
-canvas.onmouseover = function(){
-	this.style.cursor = "url('curseur.cur'), auto";
-};
+class Zombie {
+	constructor(n, m, c, d){
+		this.sx = d * 96;//abscisse du zombie dans l'image d'origine
+		this.sy = c * 128;//ordonée du zombie dans l'image d'origine
+		this.swidth = 32;//largeur du zombie sur l'image d'origine
+		this.sheight = 32;//hauteur du zombie sur l'image d'origine
+		this.positionX = n;//abscisse du zombie à afficher
+		this.positionY = m;//ordonnée du zombie à afficher
+		this.width = 32;//largeur du zombie à afficher
+		this.height = 32;//hauteur du zombie à afficher
+		
+		//ces 2 variables servent à mémoriser quel est le type de zombie zombie. Elles sont utiliser pour l'affichage du zombie
+		this.colonne = d * 96;
+		this.ligne = c * 128;
 
-//Ajout d'une tombe et d'un zombie
+		this.sensDisplayImage = 1;
+
+		//Définittion des PV, de la taille et de l'allure
+		if (d === 0){
+			this.HP = 1;
+			this.point = 1;
+			this.speed = 1;//rapide
+			this.width = 1*this.width;
+		} else if (d === 1){
+			this.HP = 2;
+			this.point = 3;
+			this.speed = 0.75;//lent
+			this.width = 1*this.width;
+			if (c === 1){
+				this.HP = 25;
+				this.point = 30;
+				this.speed = 0.5;//très lent
+				this.width = 2*32;
+				this.height = 2*32;
+			}
+		} else if(d === 3){
+			this.HP = 3;
+			this.point = 5;
+			this.speed = 0.9;//modéré
+			this.width = 1*this.width;
+		}
+	}
+
+	add(){
+		tabZombies.push(this);
+	}
+
+	delete(){
+		
+	}
+	//Affichage des zombies
+	//chaque zombie fait 32x32
+	draw(){
+		context.drawImage(zombieImage, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
+	}
+	move(){
+		//Changement d'image du pas
+		this.sx = (this.sx + this.width * this.sensDisplayImage) % 96 + this.colonne;
+		if (this.sx === this.colonne || this.sx === this.colonne + 2 * this.width) {
+			this.sensDisplayImage = - this.sensDisplayImage;
+		}
+		//déplacmeent de l'image
+		this.positionY = this.positionY + 10 * this.speed;
+		//this.sy = (this.sy + 32 ) % 96 + this.ligne;
+	}
+}
+
+class Grave {
+	constructor(n, m, e, f){
+		this.sx = e * 80;
+		this.sy = f * 121;
+		this.swidth = 80;
+		this.sheight = 121;
+		this.positionX = n;
+		this.positionY = m;
+		this.width = 32;
+		this.height = 48;
+	}
+	add(){
+		tabGraves.push(this);
+	}
+	delete(){
+
+	}
+	draw(){
+		context.drawImage(graveImage, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
+	}
+}
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//Ajout d'une tombe aléatoire et d'un zombie aléatoire
 var emergenceZombieAndGrave = function(){
-	//abscisse
-	var n = Math.random() * 600;
-	//ordonnée
-	var m = Math.random() * 100;
+	var positionX = Math.random() * 600;
+	var positionY = Math.random() * 100;
 
-	var a = {sx : 0, sy : 0, swidth : 32, sheight : 32, positionX : 0, positionY : 0, width : 32, height : 32};
-	var b = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
-	
-	a.positionX = n;
-	b.positionX = n;
-	a.positionY = m;
-	b.positionY = m;
-	
-	tabZombies.push(a);
-	tabGraves.push(b);
+	//Généaration du zombie
+	do{
+		var d = getRandomInt(0,3);
+	} while (d === 2)
+	do{
+		var c = getRandomInt(0,1);
+	} while (c === 1 && (d === 1 || d === 3))
+	var a = new Zombie (positionX, positionY, c, d);
+
+	//Génération de la tombe
+	var e = getRandomInt(0,1);
+	var f = getRandomInt(0,1);
+	var b = new Grave (positionX, positionY, e, f);
+	a.add();
+	b.add();
 };
 
 var moveZombies = function(){
 	for (var i = tabZombies.length - 1; i >= 0; i--) {
 /*		context.drawImage(zombieImage,0,0,64,64, 0,0, 100, 100);
 		console.log(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, 
-		tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);*/
+		tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
 		tabZombies[i].sx = (tabZombies[i].sx + 32 ) % 96;
-		tabZombies[i].positionY = tabZombies[i].positionY + 10;
+		tabZombies[i].positionY = tabZombies[i].positionY + 10;*/
+		tabZombies[i].move();
 	}
 };
 
@@ -122,7 +216,7 @@ function step(timestamp) {
 		start = timestamp;
 		context.clearRect(0, 0, 600, 800);
 		drawGrass();
-		drawGrave();
+		drawGraves();
 		drawZombies();
 		moveZombies();
 		emergenceZombieAndGrave();
