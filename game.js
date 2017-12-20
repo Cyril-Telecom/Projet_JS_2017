@@ -73,31 +73,31 @@ class Zombie {
 		this.sensDisplayImage = 1;
 
 		//Définittion des PV, de la taille et de l'allure
-		//this.categoriser(n, m, c, d);
-	}
-	categoriser(n, m, c, d){
-		//Définittion des PV, de la taille et de l'allure EN FONCTION de la catégorie
 		if (d === 0){
 			this.HP = 1;
+			this.maxHP = 1;
 			this.point = 1;
 			this.speed = 1;//rapide
 			this.width = 1*this.width;
 		} else if (d === 1){
 			this.HP = 2;
+			this.maxHP = 2;
 			this.point = 3;
-			this.speed = 0.75;//lent
+			this.speed = 0.6;//lent
 			this.width = 1*this.width;
 			if (c === 1){
 				this.HP = 25;
+				this.maxHP = 25;
 				this.point = 30;
-				this.speed = 0.5;//très lent
-				this.width = 2*32;
-				this.height = 2*32;
+				this.speed = 0.4;//très lent
+				this.width = 2*this.width;
+				this.height = 2*this.height;
 			}
 		} else if(d === 3){
 			this.HP = 3;
+			this.maxHP = 3;
 			this.point = 5;
-			this.speed = 0.9;//modéré
+			this.speed = 0.8;//modéré
 			this.width = 1*this.width;
 		}
 	}
@@ -109,10 +109,20 @@ class Zombie {
 	delete(){
 		
 	}
-	//Affichage des zombies
+	//Affichage des zombies et de leur barre de vie
 	//chaque zombie fait 32x32
 	draw(){
 		context.drawImage(zombieImage, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
+		//Affichage de la barre de vie
+		context.fillRect(this.positionX, this.positionY - 5, this.width * this.HP / this.maxHP, 1);
+		//choix de la couleur
+		if (this.HP === this.maxHP) {
+			context.fillStyle = "#00FF00";//vert
+		}else if (this.HP > this.maxHP/2) {
+			context.fillStyle = "#FF9900";//orange
+		}else if (this.HP < this.maxHP/2) {
+			context.fillStyle = "#FF0000";//rouge
+		}
 	}
 	move(){
 		//Changement d'image du pas
@@ -122,7 +132,6 @@ class Zombie {
 		}
 		//déplacmeent de l'image
 		this.positionY = this.positionY + 10 * this.speed;
-		//this.sy = (this.sy + 32 ) % 96 + this.ligne;
 	}
 }
 
@@ -158,7 +167,7 @@ function getRandomInt(min, max) {
 
 //Ajout d'une tombe aléatoire et d'un zombie aléatoire
 var emergenceZombieAndGrave = function(){
-	var positionX = Math.random() * 600;
+	var positionX = Math.random() * (600-64);
 	var positionY = Math.random() * 100;
 
 	//Généaration du zombie
@@ -167,9 +176,8 @@ var emergenceZombieAndGrave = function(){
 	} while (d === 2)
 	do{
 		var c = getRandomInt(0,1);
-	} while (c === 1 && (d === 1 || d === 3))
+	} while (c === 1 && (d === 0 || d === 3))
 	var a = new Zombie (positionX, positionY, c, d);
-
 	//Génération de la tombe
 	var e = getRandomInt(0,1);
 	var f = getRandomInt(0,1);
