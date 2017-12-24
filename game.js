@@ -14,6 +14,7 @@ var pause;
 var grass = new Image();
 var graveImage = new Image();
 var zombieImage = new Image();
+var zombieImageRed = new Image();
 var pointeur = new Image();
 
 // chargement des images 
@@ -23,8 +24,15 @@ graveImage.onload = drawGraves;
 zombieImage.src = "ZombieSprite.png";
 zombieImage.onload = drawZombies;
 
+zombieImageRed.src = "ZombieSpriteRed.png";
+zombieImageRed.onload = drawZombies;
+
 grass.src = "grass.png";
 grass.onload = drawGrass;
+
+
+var shoot = document.createElement("Audio");
+shoot.src = "pistol-sound-effect.mp3";
 
 // viseur 
 canvas.onmouseover = function(){
@@ -32,17 +40,23 @@ canvas.onmouseover = function(){
 };
 
 canvas.onmouseup = function(e){
-	var x = e.clientX - 330;
-	var y = e.clientY - 50;
-	console.log(x);
-	console.log(y);
+	var x = e.pageX - 375;
+	var y = e.pageY - 50;
+/*	console.log(x);
+	console.log(y);*/
 	for (var i = 0; i < tabZombies.length; i++) {
 		//console.log(tabZombies[i].isHere(x, y));
-		if (tabZombies[i].isHere(x, y)){
-			tabZombies[i].loseHP();
+		if (tabZombies[i].isHere(x, y)){//le zombie est-il là ?
+			tabZombies[i].loseHP();//le zombie perd un pv
+			if (tabZombies[i].getHP() <= 0) {
+				jeu.setPointsVictoire(tabZombies[i].getPoint());//gain de points à la mort d'un zombie
+				tabZombies.splice(i, 1);//supprime le zombie du tableau
+			}
 		}
 	}
+	shoot.play();
 };
+
 //Affichage du sol
 var drawGrass = function(){
 	for (var i = 0; i < 12; i++) {
@@ -64,15 +78,38 @@ var drawGraves = function(timestamp){
 };
 
 var drawZombies = function(){
-	//console.log("nb de zombie = " +tabZombies.length);
 	for (var i = 0; i < tabZombies.length; i++) {
-		//console.log(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
 		tabZombies[i].draw();
-		if (tabZombies[i].getHP() <= 0) {
-			tabZombies.splice(i, 1);
+		if (tabZombies[i].getImage() === zombieImageRed) {tabZombies[i].setImage(zombieImage);}
+	}
+};
+
+var moveZombies = function(){
+	for (var i = 0; i < tabZombies.length; i++) {
+		tabZombies[i].move();
+		if (tabZombies[i].isBot()) {
+			jeu.setPointDeVie(-1);//le joueur perd un pv
+			tabZombies.splice(i, 1);//supprime le zombie du tableau
 		}
 	}
 };
+
+class Jeu {
+	constructor(){
+		this.pointsVictoire = 0;
+		this.tempsJeu = 0;
+		this.pointDeVie = 10;
+	}
+
+	setPointDeVie (n){this.pointDeVie += n;}
+	getpointDeVie(){return this.pointDeVie;}
+
+	setTempsJeu(x){this.tempsJeu = x;}
+	getTempsJeu(){return this.tempsJeu;}
+
+	setPointsVictoire(x){this.pointsVictoire += x;}
+	getPointsVictoire(){return this.pointsVictoire;}
+}
 
 class Zombie {
 	constructor(n, m, c, d){
@@ -85,7 +122,7 @@ class Zombie {
 		this.positionY = m;//ordonnée du zombie à afficher
 		this.width = 32;//largeur du zombie à afficher
 		this.height = 32;//hauteur du zombie à afficher
-		
+		this.image = zombieImage;
 		//ces 2 variables servent à mémoriser quel est le type de zombie zombie. Elles sont utiliser pour l'affichage du zombie
 		this.colonne = d * 96;
 		this.ligne = c * 128;
@@ -108,8 +145,8 @@ class Zombie {
 				this.maxHP = 25;
 				this.point = 30;
 				this.speed = 0.4;//très lent
-				this.width = 2*this.width;
-				this.height = 2*this.height;
+				this.width = 1.5*this.width;
+				this.height = 1.5*this.height;
 			}
 		} else if(d === 3){
 			this.HP = 3;
@@ -119,52 +156,58 @@ class Zombie {
 		}
 	}
 	//ajoute un zombie à tabZombies
-	add(){
-		tabZombies.push(this);
-	}
+	add(){tabZombies.push(this);}
 	//Affichage des zombies et de leur barre de vie
 	//chaque zombie fait 32x32
 	draw(){
-		context.drawImage(zombieImage, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
-		//Affichage de la barre de vie
-		context.fillRect(this.positionX, this.positionY - 5, this.width * this.HP / this.maxHP, 1);
+		context.drawImage(this.image, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
 		//choix de la couleur
 		if (this.HP === this.maxHP) {
 			context.fillStyle = "#00FF00";//vert
-		}else if (this.HP >= (this.maxHP)/2) {
+		}else if (this.HP > (this.maxHP)/2){
 			context.fillStyle = "#FF9900";//orange
-		}else{
+		}else if (this.HP <= (this.maxHP)/2){
 			context.fillStyle = "#FF0000";//rouge
 		}
-		/*if (this.maxHP >= 2) {
+		//Affichage de la barre de vie
+		context.fillRect(this.positionX, this.positionY - 5, this.width * this.HP / this.maxHP, 1);
+
+/*		if (this.maxHP >= 2) {
 			for (var i = 1; i < this.maxHP; i++) {
-				context.moveTo(i * this.width / this.maxHP, this.positionY - 5);
-				context.lineTo(i * this.width / this.maxHP, this.positionY - 4);
-				context.fill();
-				//context.fillStyle = "#000000";
-			}			
+				context.moveTo(this.positionX + this.width * i / this.maxHP, this.positionY - 5);
+				context.lineTo(this.positionX + this.width * i / this.maxHP, this.positionY - 4);
+				context.stroke();
+			}
 		}*/
 	}
 	move(){
 		//Changement d'image du pas
-		this.sx = (this.sx + this.width * this.sensDisplayImage) % 96 + this.colonne;
-		if (this.sx === this.colonne || this.sx === this.colonne + 2 * this.width) {
-			this.sensDisplayImage = - this.sensDisplayImage;
+		this.sx = (this.sx + this.swidth * this.sensDisplayImage) % 96 + this.colonne;
+		if (this.sx === this.colonne || this.sx === this.colonne + 2 * this.swidth) {
+			this.sensDisplayImage *= -1;
 		}
 		//déplacmeent de l'image
 		this.positionY = this.positionY + 10 * this.speed;
 	}
+	//retourne vrai si le curseur est bien dans le carré de l'image du zombie
 	isHere(x, y){
 		if ((this.positionX < x) && (x < this.positionX + this.width) && (this.positionY < y) && (y < this.positionY + this.height)) {
 			return true;
 		}
+		return false;
 	}
 	loseHP(){
 		this.HP--;
+		this.image = zombieImageRed;
 	}
-	getHP(){
-		return this.HP;
+	getHP(){return this.HP;}
+	isBot(){
+		if (this.positionY > 800 - this.height) return true;
+		return false;
 	}
+	getPoint(){return this.point;}
+	setImage(img){this.image = img;}
+	getImage(){return this.image;}
 }
 
 class Grave {
@@ -201,17 +244,32 @@ function getRandomInt(min, max) {
 }
 
 //Ajout d'une tombe aléatoire et d'un zombie aléatoire
-var emergenceZombieAndGrave = function(timestamp){
-	var positionX = Math.random() * (600-64);
+var emergenceZombieAndGrave = function(temps, timestamp){
+	var positionX = Math.random() * (600 - 64);
 	var positionY = Math.random() * 100;
 
 	//Génération du zombie
-	do{
-		var d = getRandomInt(0,3);
-	} while (d === 2)
-	do{
-		var c = getRandomInt(0,1);
-	} while (c === 1 && (d === 0 || d === 3))
+	var c;
+	var d;
+	if (temps < 30){//zombie faible
+		d = 0;
+		c = 0;
+	}else if(temps < 100){//zombie faible et moyen
+		d = getRandomInt(0,1);
+		c = 0;
+	}else if (temps < 140) {//zombie faible, moyen et fort
+		do{
+			var d = getRandomInt(0,3);
+		} while (d === 2)
+		c = 0;
+	}else{//zombie faible, moyen, fort et boss
+		do{
+			var d = getRandomInt(0,3);
+		} while (d === 2)
+		do{
+			var c = getRandomInt(0,1);
+		} while (c === 1 && (d === 0 || d === 3))
+	}
 	var a = new Zombie (positionX, positionY, c, d);
 	a.add();
 
@@ -222,16 +280,6 @@ var emergenceZombieAndGrave = function(timestamp){
 	b.add();
 };
 
-var moveZombies = function(){
-	for (var i = 0; i < tabZombies.length; i++) {
-/*		context.drawImage(zombieImage,0,0,64,64, 0,0, 100, 100);
-		console.log(zombieImage, tabZombies[i].sx, tabZombies[i].sy, tabZombies[i].swidth, tabZombies[i].sheight, 
-		tabZombies[i].positionX, tabZombies[i].positionY, tabZombies[i].width, tabZombies[i].height);
-		tabZombies[i].sx = (tabZombies[i].sx + 32 ) % 96;
-		tabZombies[i].positionY = tabZombies[i].positionY + 10;*/
-		tabZombies[i].move();
-	}
-};
 
 // la pause sur le bouton "p"
 document.onkeydown = function (e) {
@@ -240,47 +288,69 @@ document.onkeydown = function (e) {
 			pause = false;
 			requestAnimationFrame(step);
 		}else{
-			pause=true;
+			pause = true;
 			context.fillStyle = "rgba(250, 250, 250, 0.5)";
 			context.fillRect(0, 0, 600, 800);
 			context.fillStyle ="black";
 			context.font = "82px Impact";
-			context.fillText("PAUSE",200,400);
+			context.fillText("PAUSE", 200, 400);
+			context.font = "10px arial";
+			context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 0, 10);
+			context.fillText("PV : " + jeu.getpointDeVie(), 0 , 20);
+			context.fillText("Point(s) : " + jeu.getPointsVictoire(), 0, 30);
 		}
 	}
 }
 
-/*document.oncontextmenu = function(e){
-	var x = e.clientX;
-	var y = e.clientY;
-	console.log(x);
-	console.log(y);
-	for (var i = 0; i < tabZombies.length; i++) {
-		if (tabZombies[i].isHere(x, y)){
-			tabZombies[i].loseHP();
-		}
-	}
-}*/
-
+var end = function(a){
+	pause = true;
+	context.fillStyle = "rgba(250, 250, 250, 0.5)";
+	context.fillRect(0, 0, 600, 800);
+	context.fillStyle ="black";
+	context.font = "82px Impact";
+	context.fillText(a, 150, 400);
+	context.font = "10px arial";
+	context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 0, 10);
+	context.fillText("PV : " + jeu.getpointDeVie(), 0 , 20);
+	context.fillText("Point(s) : " + jeu.getPointsVictoire(), 0, 30);
+}
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 var start = null;
+var flag = null;
+var flag2 = null;
+var jeu = new Jeu();
 
 function step(timestamp) {
 	if(pause === true) return;
+	//tant que le joueur a des points de vie
+	if (jeu.getpointDeVie() > 0){
 	var progress;
-	if (start === null) start = timestamp;
-	progress = timestamp - start;
-	if (progress > 1000){
-		start = timestamp;
-		context.clearRect(0, 0, 600, 800);
-		drawGrass();
-		drawGraves(timestamp);
-		drawZombies();
-		moveZombies();
-		emergenceZombieAndGrave(timestamp);
+	var progress2;
+		if (start === null) {
+			start = timestamp;
+			flag = start;
+			flag2 = start;
+		}
+		progress = timestamp - flag;
+		progress2 = timestamp - flag2;
+		if (progress2 > 100) {
+			flag2 = timestamp;
+			context.clearRect(0, 0, 600, 800);
+			drawGrass();
+			drawGraves(timestamp);
+			drawZombies();
+		}
+		if (progress > 750){
+			flag = timestamp;
+			jeu.setTempsJeu(timestamp - start);
+			moveZombies();
+			emergenceZombieAndGrave(jeu.getTempsJeu(),timestamp);
+		}		
+	}else{
+		end("You lose !");
 	}
 	requestAnimationFrame(step);
-};
+}
 
 requestAnimationFrame(step);
