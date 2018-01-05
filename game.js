@@ -10,7 +10,7 @@ var sy = 0;
 var tabZombies = [];
 //var graveType = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
 var tabGraves = [];
-var pause;
+var pause=false;
 var grass = new Image();
 var graveImage = new Image();
 var zombieImage = new Image();
@@ -40,23 +40,26 @@ canvas.onmouseover = function(){
 };
 
 canvas.onmouseup = function(e){
-	var x = e.offsetX;
-	var y = e.offsetY ;
-	/*var x = e.clientX;
-	var y = e.clientY;*/
-	console.log("viseur x: "+ x+ " y: "+ y);
-	console.log("1er zombie x: " + tabZombies[0].positionX+ " y:"+ tabZombies[0].positionY);
-	for (var i = 0; i < tabZombies.length; i++) {
-		//console.log(tabZombies[i].isHere(x, y));
-		if (tabZombies[i].isHere(x, y)){//le zombie est-il là ?
-			tabZombies[i].loseHP();//le zombie perd un pv
-			if (tabZombies[i].getHP() <= 0) {
-				jeu.setPointsVictoire(tabZombies[i].getPoint());//gain de points à la mort d'un zombie
-				tabZombies.splice(i, 1);//supprime le zombie du tableau
+	if(pause===false){
+		var x = e.offsetX;
+		var y = e.offsetY ;
+		/*
+		console.log("viseur x: "+ x+ " y: "+ y);
+		console.log("1er zombie x: " + tabZombies[0].positionX+ " y:"+ tabZombies[0].positionY);
+		*/
+		for (var i = 0; i < tabZombies.length; i++) {
+			//console.log(tabZombies[i].isHere(x, y));
+			if (tabZombies[i].isHere(x, y)){//le zombie est-il là ?
+				tabZombies[i].loseHP();//le zombie perd un pv
+				if (tabZombies[i].getHP() <= 0) {
+					jeu.setPointsVictoire(tabZombies[i].getPoint());//gain de points à la mort d'un zombie
+					tabZombies.splice(i, 1);//supprime le zombie du tableau
+				}
 			}
 		}
+		shoot.play();
 	}
-	shoot.play();
+	
 };
 
 //Affichage du sol
