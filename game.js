@@ -40,8 +40,8 @@ canvas.onmouseover = function(){
 };
 
 canvas.onmouseup = function(e){
-	var x = e.pageX - 375;
-	var y = e.pageY - 50;
+	var x = e.offsetX;
+	var y = e.offsetY ;
 	/*var x = e.clientX;
 	var y = e.clientY;*/
 	console.log("viseur x: "+ x+ " y: "+ y);
