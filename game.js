@@ -6,9 +6,8 @@ var x = 0;
 var y = 0;
 var sx = 0;
 var sy = 0;
-//var zombieType = {sx : 0, sy : 0, swidth : 32, sheight : 32, positionX : 0, positionY : 0, width : 32, height : 32};
+
 var tabZombies = [];
-//var graveType = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
 var tabGraves = [];
 var pause = false;
 var tempsPause = 0;
@@ -47,7 +46,6 @@ canvas.onmouseup = function(e){
 		var x = e.offsetX;
 		var y = e.offsetY ;
 		for (var i = 0; i < tabZombies.length; i++) {
-			//console.log(tabZombies[i].isHere(x, y));
 			if (tabZombies[i].isHere(x, y)){//le zombie est-il là ?
 				tabZombies[i].loseHP();//le zombie perd un pv
 				if (tabZombies[i].getHP() <= 0) {
@@ -71,10 +69,8 @@ var drawGrass = function(){
 
 //Affichage des tombes
 var drawGraves = function(){
-	//console.log("nb de tombe = "+tabGraves.length);
 	for (var i = tabGraves.length - 1; i >= 0; i--) {
 		tabGraves[i].draw();
-		console.log(jeu.getTempsJeu());
 		if (jeu.getTempsJeu() - tabGraves[i].getTime() > 10000) {
 			tabGraves.splice(i, 1);
 		}
@@ -203,7 +199,6 @@ function step(timestamp) {
 				emergenceZombieAndGrave(jeu.getTempsJeu());
 			}
 			if (timestamp - flag2 > 100) {
-				// console.log(jeu.getTempsJeu());
 				jeu.setTempsJeu(jeu.getTempsJeu() + timestamp - flag2);
 				flag2 = timestamp;
 				context.clearRect(0, 0, 600, 800);
