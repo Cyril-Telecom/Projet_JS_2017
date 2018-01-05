@@ -10,7 +10,10 @@ var sy = 0;
 var tabZombies = [];
 //var graveType = {sx : 0, sy : 0, swidth : 80, sheight : 121, positionX : 0, positionY : 0, width : 32, height : 48};
 var tabGraves = [];
-var pause=false;
+var pause = false;
+var tempsPause = 0;
+var flagPause = 0;
+
 var grass = new Image();
 var graveImage = new Image();
 var zombieImage = new Image();
@@ -40,13 +43,9 @@ canvas.onmouseover = function(){
 };
 
 canvas.onmouseup = function(e){
-	if(pause===false){
+	if(pause === false){
 		var x = e.offsetX;
 		var y = e.offsetY ;
-		/*
-		console.log("viseur x: "+ x+ " y: "+ y);
-		console.log("1er zombie x: " + tabZombies[0].positionX+ " y:"+ tabZombies[0].positionY);
-		*/
 		for (var i = 0; i < tabZombies.length; i++) {
 			//console.log(tabZombies[i].isHere(x, y));
 			if (tabZombies[i].isHere(x, y)){//le zombie est-il là ?
@@ -58,8 +57,7 @@ canvas.onmouseup = function(e){
 			}
 		}
 		shoot.play();
-	}
-	
+	}	
 };
 
 //Affichage du sol
@@ -72,11 +70,12 @@ var drawGrass = function(){
 };
 
 //Affichage des tombes
-var drawGraves = function(timestamp){
+var drawGraves = function(){
 	//console.log("nb de tombe = "+tabGraves.length);
 	for (var i = tabGraves.length - 1; i >= 0; i--) {
 		tabGraves[i].draw();
-		if (timestamp - tabGraves[i].getTime() > 10000) {
+		console.log(jeu.getTempsJeu());
+		if (jeu.getTempsJeu() - tabGraves[i].getTime() > 10000) {
 			tabGraves.splice(i, 1);
 		}
 	}
@@ -99,12 +98,6 @@ var moveZombies = function(){
 	}
 };
 
-
-
-
-
-
-
 /**
  * Returns a random integer between min (inclusive) and max (inclusive)
  * Using Math.round() will give you a non-uniform distribution!
@@ -114,20 +107,19 @@ function getRandomInt(min, max) {
 }
 
 //Ajout d'une tombe aléatoire et d'un zombie aléatoire
-var emergenceZombieAndGrave = function(temps, timestamp){
+var emergenceZombieAndGrave = function(){
 	var positionX = Math.random() * (600 - 64);
 	var positionY = Math.random() * 100;
-
 	//Génération du zombie
 	var c;
 	var d;
-	if (temps < 30){//zombie faible
+	if (jeu.getTempsJeu() < 30000){//zombie faible
 		d = 0;
 		c = 0;
-	}else if(temps < 100){//zombie faible et moyen
+	}else if(jeu.getTempsJeu() < 100000){//zombie faible et moyen
 		d = getRandomInt(0,1);
 		c = 0;
-	}else if (temps < 140) {//zombie faible, moyen et fort
+	}else if (jeu.getTempsJeu() < 140000) {//zombie faible, moyen et fort
 		do{
 			var d = getRandomInt(0,3);
 		} while (d === 2)
@@ -146,7 +138,7 @@ var emergenceZombieAndGrave = function(temps, timestamp){
 	//Génération de la tombe
 	var e = getRandomInt(0,1);
 	var f = getRandomInt(0,1);
-	var b = new Grave (positionX, positionY, e, f, timestamp);
+	var b = new Grave (positionX, positionY, e, f, jeu.getTempsJeu());
 	b.add();
 };
 
@@ -161,7 +153,7 @@ document.onkeydown = function (e) {
 			pause = true;
 			context.fillStyle = "rgba(250, 250, 250, 0.5)";
 			context.fillRect(0, 0, 600, 800);
-			context.fillStyle ="black";
+			context.fillStyle = "black";
 			context.font = "82px Impact";
 			context.fillText("PAUSE", 200, 400);
 			context.font = "10px arial";
@@ -170,57 +162,65 @@ document.onkeydown = function (e) {
 			context.fillText("Point(s) : " + jeu.getPointsVictoire(), 0, 30);
 		}
 	}
-}
+};
 
 var end = function(a){
 	pause = true;
 	context.fillStyle = "rgba(250, 250, 250, 0.5)";
 	context.fillRect(0, 0, 600, 800);
 	context.fillStyle ="black";
-	context.font = "82px Impact";
+	context.font = "30px Impact";
 	context.fillText(a, 150, 400);
 	context.font = "10px arial";
 	context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 0, 10);
 	context.fillText("PV : " + jeu.getpointDeVie(), 0 , 20);
 	context.fillText("Point(s) : " + jeu.getPointsVictoire(), 0, 30);
-}
+};
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 var start = null;
 var flag = null;
 var flag2 = null;
+var flag3 = null;
 var jeu = new Jeu();
 
 function step(timestamp) {
-	if(pause === true) return;
-	//tant que le joueur a des points de vie
-	if (jeu.getpointDeVie() > 0){
-	var progress;
-	var progress2;
-		if (start === null) {
-			start = timestamp;
-			flag = start;
-			flag2 = start;
+	if(pause === true)	{
+		flag3 = timestamp;
+		flag2 = timestamp;
+		flag = timestamp;
+	}else if (pause === false){
+		//tant que le joueur a des points de vie et que le temps n'est pas dépassé
+		if (jeu.getpointDeVie() > 0 && jeu.getTempsJeu() < 200000){
+			if (start === null) {
+				start = timestamp;
+				flag = start;
+				flag2 = start;
+				flag3 = start;
+			}
+			if (timestamp - flag3 > 750) {
+				flag3 = timestamp;
+				emergenceZombieAndGrave(jeu.getTempsJeu());
+			}
+			if (timestamp - flag2 > 100) {
+				// console.log(jeu.getTempsJeu());
+				jeu.setTempsJeu(jeu.getTempsJeu() + timestamp - flag2);
+				flag2 = timestamp;
+				context.clearRect(0, 0, 600, 800);
+				drawGrass();
+				drawGraves();
+				drawZombies();
+			}
+			if (timestamp - flag > 200){
+				flag = timestamp;
+				moveZombies();
+			}		
+		}else if (jeu.getpointDeVie() <= 0){
+			end("You lose !");
+		}else{
+			end("You win with " + jeu.getPointsVictoire() + " points");
 		}
-		progress = timestamp - flag;
-		progress2 = timestamp - flag2;
-		if (progress2 > 100) {
-			flag2 = timestamp;
-			context.clearRect(0, 0, 600, 800);
-			drawGrass();
-			drawGraves(timestamp);
-			drawZombies();
-		}
-		if (progress > 150){
-			flag = timestamp;
-			jeu.setTempsJeu(timestamp - start);
-			moveZombies();
-			emergenceZombieAndGrave(jeu.getTempsJeu(),timestamp);
-		}		
-	}else{
-		end("You lose !");
 	}
 	requestAnimationFrame(step);
 }
-
 requestAnimationFrame(step);

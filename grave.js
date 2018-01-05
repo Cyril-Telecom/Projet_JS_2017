@@ -1,5 +1,5 @@
 class Grave {
-	constructor(n, m, e, f, timestamp){
+	constructor(n, m, e, f, temps){
 		//paramètres de l'image
 		this.sx = e * 80;
 		this.sy = f * 121;
@@ -10,7 +10,7 @@ class Grave {
 		this.width = 32;
 		this.height = 48;
 
-		this.time = timestamp;
+		this.time = temps;
 	}
 	add(){
 		tabGraves.push(this);
