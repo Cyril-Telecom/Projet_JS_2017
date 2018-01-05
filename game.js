@@ -208,7 +208,7 @@ function step(timestamp) {
 			drawGraves(timestamp);
 			drawZombies();
 		}
-		if (progress > 750){
+		if (progress > 150){
 			flag = timestamp;
 			jeu.setTempsJeu(timestamp - start);
 			moveZombies();

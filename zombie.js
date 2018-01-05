@@ -74,7 +74,7 @@ class Zombie {
 			this.sensDisplayImage *= -1;
 		}
 		//déplacmeent de l'image
-		this.positionY = this.positionY + 10 * this.speed;
+		this.positionY = this.positionY + 5 * this.speed;
 	}
 	//retourne vrai si le curseur est bien dans le carré de l'image du zombie
 	isHere(x, y){
