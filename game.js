@@ -152,10 +152,10 @@ document.onkeydown = function (e) {
 			context.fillStyle = "black";
 			context.font = "82px Impact";
 			context.fillText("PAUSE", 200, 400);
-			context.font = "10px arial";
-			context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 0, 10);
-			context.fillText("PV : " + jeu.getpointDeVie(), 0 , 20);
-			context.fillText("Point(s) : " + jeu.getPointsVictoire(), 0, 30);
+			context.font = "24px arial Bold";
+			context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 10, 20);
+			context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);
+			context.fillText("Point(s) : " + jeu.getPointsVictoire(), 450, 20);
 		}
 	}
 };
@@ -167,11 +167,19 @@ var end = function(a){
 	context.fillStyle ="black";
 	context.font = "30px Impact";
 	context.fillText(a, 150, 400);
+<<<<<<< Updated upstream
 	context.font = "10px arial";
 	context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 0, 10);
 	context.fillText("PV : " + jeu.getpointDeVie(), 0 , 20);
 	context.fillText("Point(s) : " + jeu.getPointsVictoire(), 0, 30);
 };
+=======
+	context.font = "24px arial Bold";
+	context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000),  10,20);
+	context.fillText("PV : " + jeu.getpointDeVie(), 300, 20);
+	context.fillText("Point(s) : " + jeu.getPointsVictoire(), 450,20);
+}
+>>>>>>> Stashed changes
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 var start = null;
