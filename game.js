@@ -35,7 +35,9 @@ grass.onload = drawGrass;
 
 var shoot = document.createElement("Audio");
 shoot.src = "pistol-sound-effect.mp3";
-
+var sound = document.createElement("Audio");
+sound.src = "sound_bg.mp3";
+sound.play();
 // viseur 
 canvas.onmouseover = function(){
 	this.style.cursor = "url('curseur.cur'), auto";
