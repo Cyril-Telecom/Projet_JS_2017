@@ -86,7 +86,8 @@ var drawZombies = function(){
 	}
 	context.fillStyle = "white";
 	context.font = "24px arial Bold";
-	context.fillText("Temps restant de jeu : " + Math.floor(3 - jeu.getTempsJeu()/60000) + " : " + Math.floor(60 - jeu.getTempsJeu()%60000/1000), 10, 20);
+	var tempsRestant = 200000 - jeu.getTempsJeu();
+	context.fillText("Temps restant de jeu : " + Math.floor(tempsRestant/60000) + " : " + Math.floor(tempsRestant%60000/1000), 10, 20);
 	context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);
 	context.fillText("Points : " + jeu.getPointsVictoire(), 450, 20);
 };
