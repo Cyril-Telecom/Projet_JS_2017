@@ -84,6 +84,11 @@ var drawZombies = function(){
 		tabZombies[i].draw();
 		if (tabZombies[i].getImage() === zombieImageRed) {tabZombies[i].setImage(zombieImage);}
 	}
+	context.fillStyle = "white";
+	context.font = "24px arial Bold";
+	context.fillText("Temps restant de jeu : " + Math.floor(3 - jeu.getTempsJeu()/60000) + " : " + Math.floor(60 - jeu.getTempsJeu()%60000/1000), 10, 20);
+	context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);
+	context.fillText("Points : " + jeu.getPointsVictoire(), 450, 20);
 };
 
 var moveZombies = function(){
@@ -154,10 +159,7 @@ document.onkeydown = function (e) {
 			context.fillStyle = "black";
 			context.font = "82px Impact";
 			context.fillText("PAUSE", 200, 400);
-			context.font = "24px arial Bold";
-			context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000), 10, 20);
-			context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);
-			context.fillText("Point(s) : " + jeu.getPointsVictoire(), 450, 20);
+
 		}
 	}
 };
@@ -169,10 +171,6 @@ var end = function(a){
 	context.fillStyle ="black";
 	context.font = "30px Impact";
 	context.fillText(a, 150, 400);
-	context.font = "24px arial Bold";
-	context.fillText("Temps de jeu : " + Math.floor(jeu.getTempsJeu()/60000) + " : " + Math.floor(jeu.getTempsJeu()%60000/1000),  10,20);
-	context.fillText("PV : " + jeu.getpointDeVie(), 300, 20);
-	context.fillText("Point(s) : " + jeu.getPointsVictoire(), 450,20);
 };
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
