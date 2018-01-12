@@ -1,3 +1,8 @@
+/**
+*	Classe qui définie les Zombies du jeu
+*	4 sortes de zombie (faible, moyen,fort, Boss)
+**/
+
 class Zombie {
 	constructor(n, m, c, d){
 		//paramètres de l'image

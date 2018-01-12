@@ -1,3 +1,8 @@
+/**
+*	Classe qui définie les tombes des zombies 
+*	
+**/
+
 class Grave {
 	constructor(n, m, e, f, temps){
 		//paramètres de l'image
@@ -9,7 +14,7 @@ class Grave {
 		this.positionY = m;
 		this.width = 32;
 		this.height = 48;
-
+		
 		this.time = temps;
 	}
 	add(){

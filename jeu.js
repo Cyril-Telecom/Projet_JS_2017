@@ -1,3 +1,7 @@
+/**
+*	Classe qui initialise le temps de jeu, les points de vie du joueur et les points de victoire
+*
+**/
 class Jeu {
 	constructor(){
 		this.pointsVictoire = 0;

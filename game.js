@@ -12,6 +12,7 @@ var tabGraves = [];
 var pause = false;
 var tempsPause = 0;
 var flagPause = 0;
+var bossPasApparu= true;
 
 var grass = new Image();
 var graveImage = new Image();
@@ -22,22 +23,20 @@ var pointeur = new Image();
 // chargement des images 
 graveImage.src = "Gravestone.png";
 graveImage.onload = drawGraves;
-
 zombieImage.src = "ZombieSprite.png";
 zombieImage.onload = drawZombies;
-
 zombieImageRed.src = "ZombieSpriteRed.png";
 zombieImageRed.onload = drawZombies;
-
 grass.src = "grass.png";
 grass.onload = drawGrass;
 
-
+// chargement des sons
 var shoot = document.createElement("Audio");
 shoot.src = "pistol-sound-effect.mp3";
 var sound = document.createElement("Audio");
 sound.src = "sound_bg.mp3";
 sound.play();
+
 // viseur 
 canvas.onmouseover = function(){
 	this.style.cursor = "url('curseur.cur'), auto";
@@ -79,6 +78,7 @@ var drawGraves = function(){
 	}
 };
 
+//Affichage des zombies + affichage des informations du jeu
 var drawZombies = function(){
 	for (var i = 0; i < tabZombies.length; i++) {
 		tabZombies[i].draw();
@@ -86,16 +86,17 @@ var drawZombies = function(){
 	}
 	context.fillStyle = "white";
 	context.font = "24px arial Bold";
-	var tempsRestant = 200000 - jeu.getTempsJeu();
-	context.fillText(Math.floor(tempsRestant/60000) + " min " + Math.floor(tempsRestant%60000/1000) + " s", 10, 20);
-	context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);
-	context.fillText("Points : " + jeu.getPointsVictoire(), 450, 20);
+	var tempsRestant = Math.abs(200000 - jeu.getTempsJeu());
+	context.fillText(Math.floor(tempsRestant/60000) + " min " + Math.floor(tempsRestant%60000/1000) + " s", 10, 20);// temps restants
+	context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);// point de vie restant
+	context.fillText("Points : " + jeu.getPointsVictoire(), 450, 20);// total des points du joueur
 };
 
+// déplacement des zombies
 var moveZombies = function(){
 	for (var i = 0; i < tabZombies.length; i++) {
 		tabZombies[i].move();
-		if (tabZombies[i].isBot()) {
+		if (tabZombies[i].isBot()) { //si le zombie arrive en bas 
 			jeu.setPointDeVie(-1);//le joueur perd un pv
 			tabZombies.splice(i, 1);//supprime le zombie du tableau
 		}
@@ -129,12 +130,16 @@ var emergenceZombieAndGrave = function(){
 		} while (d === 2)
 		c = 0;
 	}else{//zombie faible, moyen, fort et boss
-		do{
-			var d = getRandomInt(0,3);
-		} while (d === 2)
-		do{
-			var c = getRandomInt(0,1);
-		} while (c === 1 && (d === 0 || d === 3))
+		if(bossPasApparu===true){
+			c=1;
+			d=1;
+			bossPasApparu=false;
+		}else{
+			do{
+				var d = getRandomInt(0,3);
+			} while (d === 2)
+			c = 0;
+		}
 	}
 	var a = new Zombie (positionX, positionY, c, d);
 	a.add();
@@ -174,6 +179,19 @@ var end = function(a){
 	context.fillText(a, 150, 400);
 };
 
+/**
+*	Fonction qui permet de changer le temps d'aparition des zombies 
+*	a partir de 2min20 le temps passe a 1s au lieu de 2s 
+*
+**/
+var changeTime = function(t){
+	if(t<140000){
+		return 2000;
+	}
+	return 1000;
+}
+
+
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 var start = null;
 var flag = null;
@@ -195,7 +213,7 @@ function step(timestamp) {
 				flag2 = start;
 				flag3 = start;
 			}
-			if (timestamp - flag3 > 750) {
+			if (timestamp - flag3 > changeTime(jeu.getTempsJeu())) {
 				flag3 = timestamp;
 				emergenceZombieAndGrave(jeu.getTempsJeu());
 			}
