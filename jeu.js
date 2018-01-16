@@ -9,7 +9,7 @@ class Jeu {
 		this.pointDeVie = 10;
 	}
 
-	setPointDeVie (n){this.pointDeVie += n;}
+	addPointDeVie(n){this.pointDeVie += n;}
 	getpointDeVie(){return this.pointDeVie;}
 
 	setTempsJeu(x){this.tempsJeu = x;}

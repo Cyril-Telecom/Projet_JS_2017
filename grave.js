@@ -14,15 +14,18 @@ class Grave {
 		this.positionY = m;
 		this.width = 32;
 		this.height = 48;
-		
-		this.time = temps;
+		this.time = temps;//instant au quel est apparu la tombe
 	}
+
+	/*ajoute un objet tombe à tabGraves*/
 	add(){
 		tabGraves.push(this);
 	}
-	getTime(){
-		return this.time;
-	}
+
+	/*retourne l'instant au quel est apparu la tombe*/
+	getTime(){return this.time;}
+
+	/*Dessine la tombe*/
 	draw(){
 		context.drawImage(graveImage, this.sx, this.sy, this.swidth, this.sheight, this.positionX, this.positionY, this.width, this.height);
 	}

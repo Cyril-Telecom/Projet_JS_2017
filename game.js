@@ -2,31 +2,32 @@ var canvas = document.getElementById("cv");
 var context = canvas.getContext("2d");
 
 //déclaration des variables
-var x = 0;
-var y = 0;
-var sx = 0;
-var sy = 0;
+var jeu = new Jeu();
 
+//Tableaux qui contiennent l'ensemble des zombies et des tombes. Ils sont actualisés dans les fonctions drawGraves et drawZombies
 var tabZombies = [];
 var tabGraves = [];
-var pause = false;
-var tempsPause = 0;
-var flagPause = 0;
-var bossPasApparu= true;
 
-var grass = new Image();
-var graveImage = new Image();
-var zombieImage = new Image();
-var zombieImageRed = new Image();
-var pointeur = new Image();
+var pause = false;//booléen vrai si le jeu est en pause et faux si le jeu n'est pas en pause
+var bossPasApparu = true;//booléen vrai si le boss N'EST PAS encore apparu et faux si le boss est DEJA apparu
+var bossPasApparu = true;//booléen vrai si le boss N'EST PAS encore apparu et faux si le boss est DEJA apparu
+
+var grass = new Image();//image de l'herbe
+var graveImage = new Image();//image sprite des tombes
+var zombieImage = new Image();//image sprite des zombies
+var zombieImageRed = new Image();//image sprite des zombies rouges
+var pointeur = new Image();//image du pointeur cible
 
 // chargement des images 
 graveImage.src = "Gravestone.png";
 graveImage.onload = drawGraves;
+
 zombieImage.src = "ZombieSprite.png";
 zombieImage.onload = drawZombies;
+
 zombieImageRed.src = "ZombieSpriteRed.png";
 zombieImageRed.onload = drawZombies;
+
 grass.src = "grass.png";
 grass.onload = drawGrass;
 
@@ -37,7 +38,7 @@ var sound = document.createElement("Audio");
 sound.src = "sound_bg.mp3";
 sound.play();
 
-// viseur 
+// Changement de l'image du pointeur en viseur 
 canvas.onmouseover = function(){
 	this.style.cursor = "url('curseur.cur'), auto";
 };
@@ -72,7 +73,8 @@ var drawGrass = function(){
 var drawGraves = function(){
 	for (var i = tabGraves.length - 1; i >= 0; i--) {
 		tabGraves[i].draw();
-		if (jeu.getTempsJeu() - tabGraves[i].getTime() > 10000) {
+		//Elimination des tombes de plus de 20 secondes
+		if (jeu.getTempsJeu() - tabGraves[i].getTime() > 20000) {
 			tabGraves.splice(i, 1);
 		}
 	}
@@ -82,14 +84,16 @@ var drawGraves = function(){
 var drawZombies = function(){
 	for (var i = 0; i < tabZombies.length; i++) {
 		tabZombies[i].draw();
-		if (tabZombies[i].getImage() === zombieImageRed) {tabZombies[i].setImage(zombieImage);}
+		if (tabZombies[i].getImage() === zombieImageRed) tabZombies[i].setImage(zombieImage);
 	}
 	context.fillStyle = "white";
 	context.font = "24px arial Bold";
 	var tempsRestant = Math.abs(200000 - jeu.getTempsJeu());
 	context.fillText(Math.floor(tempsRestant/60000) + " min " + Math.floor(tempsRestant%60000/1000) + " s", 10, 20);// temps restants
-	context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);// point de vie restant
-	context.fillText("Points : " + jeu.getPointsVictoire(), 450, 20);// total des points du joueur
+	// affichagepoint de vie restant	
+	context.fillText("PV : " + jeu.getpointDeVie(), 300 , 20);
+	// total des points du joueur
+	context.fillText("Points : " + jeu.getPointsVictoire(), 450, 20);
 };
 
 // déplacement des zombies
@@ -97,7 +101,7 @@ var moveZombies = function(){
 	for (var i = 0; i < tabZombies.length; i++) {
 		tabZombies[i].move();
 		if (tabZombies[i].isBot()) { //si le zombie arrive en bas 
-			jeu.setPointDeVie(-1);//le joueur perd un pv
+			jeu.addPointDeVie(-1);//le joueur perd un pv
 			tabZombies.splice(i, 1);//supprime le zombie du tableau
 		}
 	}
@@ -115,6 +119,7 @@ function getRandomInt(min, max) {
 var emergenceZombieAndGrave = function(){
 	var positionX = Math.random() * (600 - 64);
 	var positionY = Math.random() * 100;
+
 	//Génération du zombie
 	var c;
 	var d;
@@ -130,10 +135,10 @@ var emergenceZombieAndGrave = function(){
 		} while (d === 2)
 		c = 0;
 	}else{//zombie faible, moyen, fort et boss
-		if(bossPasApparu===true){
+		if(bossPasApparu === true){
 			c=1;
 			d=1;
-			bossPasApparu=false;
+			bossPasApparu = false;
 		}else{
 			do{
 				var d = getRandomInt(0,3);
@@ -145,9 +150,7 @@ var emergenceZombieAndGrave = function(){
 	a.add();
 
 	//Génération de la tombe
-	var e = getRandomInt(0,1);
-	var f = getRandomInt(0,1);
-	var b = new Grave (positionX, positionY, e, f, jeu.getTempsJeu());
+	var b = new Grave (positionX, positionY, getRandomInt(0,1), getRandomInt(0,1), jeu.getTempsJeu());
 	b.add();
 };
 
@@ -165,11 +168,11 @@ document.onkeydown = function (e) {
 			context.fillStyle = "black";
 			context.font = "82px Impact";
 			context.fillText("PAUSE", 200, 400);
-
 		}
 	}
 };
 
+/*Fonction qui met en pose */
 var end = function(a){
 	pause = true;
 	context.fillStyle = "rgba(250, 250, 250, 0.5)";
@@ -185,7 +188,7 @@ var end = function(a){
 *
 **/
 var changeTime = function(t){
-	if(t<140000){
+	if(t < 140000){
 		return 2000;
 	}
 	return 1000;
@@ -197,7 +200,6 @@ var start = null;
 var flag = null;
 var flag2 = null;
 var flag3 = null;
-var jeu = new Jeu();
 
 function step(timestamp) {
 	if(pause === true)	{
@@ -217,15 +219,17 @@ function step(timestamp) {
 				flag3 = timestamp;
 				emergenceZombieAndGrave(jeu.getTempsJeu());
 			}
-			if (timestamp - flag2 > 100) {
+			if (timestamp - flag2 > 10) {
+				//actualise le temps de jeu réel
 				jeu.setTempsJeu(jeu.getTempsJeu() + timestamp - flag2);
 				flag2 = timestamp;
+				//affiche l'herbe, les tombes et les zombies
 				context.clearRect(0, 0, 600, 800);
 				drawGrass();
 				drawGraves();
 				drawZombies();
 			}
-			if (timestamp - flag > 200){
+			if (timestamp - flag > 175){
 				flag = timestamp;
 				moveZombies();
 			}		
