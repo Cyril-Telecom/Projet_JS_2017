@@ -36,6 +36,7 @@ shoot.src = "pistol-sound-effect.mp3";
 var sound = document.createElement("Audio");
 sound.src = "sound_bg.mp3";
 sound.play();
+sound.loop=true;
 
 // Changement de l'image du pointeur en viseur 
 canvas.onmouseover = function(){
