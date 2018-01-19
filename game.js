@@ -10,7 +10,6 @@ var tabGraves = [];
 
 var pause = false;//booléen vrai si le jeu est en pause et faux si le jeu n'est pas en pause
 var bossPasApparu = true;//booléen vrai si le boss N'EST PAS encore apparu et faux si le boss est DEJA apparu
-var bossPasApparu = true;//booléen vrai si le boss N'EST PAS encore apparu et faux si le boss est DEJA apparu
 
 var grass = new Image();//image de l'herbe
 var graveImage = new Image();//image sprite des tombes
@@ -172,7 +171,7 @@ document.onkeydown = function (e) {
 	}
 };
 
-/*Fonction qui met en pose */
+/*Fonction qui affiche la fin de la partie  */
 var end = function(a){
 	pause = true;
 	context.fillStyle = "rgba(250, 250, 250, 0.5)";
